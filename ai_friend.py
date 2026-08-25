@@ -46,7 +46,8 @@ if user_input := st.chat_input("Здорова! Че по машинам или 
         
         data = {
             "model": MODEL_NAME,
-            "messages": st.session_state.messages
+            "messages": st.session_state.messages,
+            "max_tokens": 400  # Жестко режем бронь токенов шлюза в 10 раз!
         }
         
         # json.dumps гарантирует идеальную кодировку кириллицы перед отправкой
