@@ -57,13 +57,25 @@ MODEL_NAME = "gpt-4o-mini"
 if user_input := st.chat_input("Здорова! Че по машинам или по жизни?"):
     with st.chat_message("user"):
         st.write(user_input)
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    
+    # Защита от косяков кодировки: принудительно переводим ввод в UTF-8
+    safe_user_input = user_input.encode('utf-8', errors='ignore').decode('utf-8')
+    st.session_state.messages.append({"role": "user", "content": safe_user_input})
 
     # Запрос к нейросети
     try:
+        # Принудительно кодируем всю историю сообщений в UTF-8, чтобы API не ругался на русский текст
+        safe_messages = [
+            {
+                "role": msg["role"], 
+                "content": msg["content"].encode('utf-8', errors='ignore').decode('utf-8')
+            } 
+            for msg in st.session_state.messages
+        ]
+
         response = client.chat.completions.create(
             model=MODEL_NAME,
-            messages=st.session_state.messages
+            messages=safe_messages
         )
         reply = response.choices.message.content
         
