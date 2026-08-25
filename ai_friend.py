@@ -7,19 +7,18 @@ st.set_page_config(page_title="Гаражный Кореш ИИ", page_icon="⚙
 st.title("⚙️ Твой ИИ-Кореш на связи")
 st.caption("Чистый разум, честное железо, Саракташ 2026")
 
-# 📥 Загружаем системный промт из JSON-файла с жестким указанием UTF-8 кодировки
+# 📥 Загружаем системный промт из JSON-файла
 try:
     with open("context.json", "r", encoding="utf-8") as f:
         context_data = json.load(f)
     SYSTEM_PROMPT = context_data["system_prompt"]
 except Exception as e:
-    st.error(f"Косяк загрузки базы знаний: {e}")
     SYSTEM_PROMPT = "Ты просто ИИ-помощник."
 
-# 🔌 Настройка подключения к нейросети (API) из секретов облака
-API_KEY = st.secrets["API_KEY"]
-BASE_URL = st.secrets.get("BASE_URL", "https://proxyapi.ru")
-MODEL_NAME = st.secrets.get("MODEL_NAME", "gpt-4o-mini")
+# 🔌 Жестко прописываем рабочие параметры ProxyAPI напрямую в код
+API_KEY = "sk-RHqikjrG8RpjVO3Xo2e2d3dZFKU6se4c"
+BASE_URL = "https://proxyapi.ru"
+MODEL_NAME = "gpt-4o-mini"
 
 client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
