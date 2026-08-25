@@ -1,7 +1,6 @@
 import streamlit as st
-from openai import OpenAI
 import json
-import os
+import requests  # Заменяем капризный openai на надежные HTTP-запросы
 
 st.set_page_config(page_title="Гаражный Кореш ИИ", page_icon="⚙️", layout="centered")
 st.title("⚙️ Твой ИИ-Кореш на связи")
@@ -15,12 +14,10 @@ try:
 except Exception as e:
     SYSTEM_PROMPT = "Ты просто ИИ-помощник."
 
-# 🔌 Жестко прописываем рабочие параметры ProxyAPI напрямую в код
+# 🔌 Сетевые параметры шлюза ProxyAPI
 API_KEY = "sk-RHqikjrG8RpjVO3Xo2e2d3dZFKU6se4c"
-BASE_URL = "https://proxyapi.ru"
+URL = "https://proxyapi.ru" # Прямой эндпоинт для POST-запроса
 MODEL_NAME = "gpt-4o-mini"
-
-client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
 # 🧠 Работа с оперативной памятью чата
 if "messages" not in st.session_state:
@@ -38,16 +35,34 @@ if user_input := st.chat_input("Здорова! Че по машинам или 
         st.write(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Запрос к нейросети
+    # Отправляем «неубиваемый» JSON-запрос через HTTP POST
     try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=st.session_state.messages
-        )
-        reply = response.choices.message.content
+        headers = {
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json; charset=utf-8" # Жестко приказываем серверу читать UTF-8
+        }
         
-        with st.chat_message("assistant"):
-            st.write(reply)
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+        data = {
+            "model": MODEL_NAME,
+            "messages": st.session_state.messages
+        }
+        
+        # Шлем запрос в облако. json.dumps гарантирует идеальную кодировку кириллицы
+        response = requests.post(
+            URL, 
+            headers=headers, 
+            data=json.dumps(data, ensure_ascii=False).encode('utf-8')
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            reply = result["choices"][0]["message"]["content"]
+            
+            with st.chat_message("assistant"):
+                st.write(reply)
+            st.session_state.messages.append({"role": "assistant", "content": reply})
+        else:
+            st.error(f"Косяк шлюза ProxyAPI (Статус {response.status_code}): {response.text}")
+            
     except Exception as e:
-        st.error(f"Бро, косяк в коде или с сетью (ошибка API): {e}")
+        st.error(f"Бро, упала сеть или косяк в запросе: {e}")
