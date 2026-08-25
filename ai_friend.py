@@ -16,9 +16,9 @@ try:
 except Exception as e:
     SYSTEM_PROMPT = "Ты просто ИИ-помощник."
 
-# 🔌 Сетевые параметры шлюза ProxyAPI (ОФИЦИАЛЬНЫЙ РАБОЧИЙ URL)
+# 🔌 Сетевые параметры шлюза ProxyAPI (Официальный проверенный URL)
 API_KEY = "sk-RHqikjrG8RpjVO3Xo2e2d3dZFKU6se4c"
-URL = "https://api.proxyapi.ru/openai/v1/chat/completions" # Вот сюда добавили /openai/
+URL = "https://proxyapi.ru"
 MODEL_NAME = "gpt-4o-mini"
 
 # 🧠 Работа с оперативной памятью чата (чтобы бот помнил диалог)
@@ -37,7 +37,7 @@ if user_input := st.chat_input("Здорова! Че по машинам или 
         st.write(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Отправляем неубиваемый JSON-запрос через HTTP POST в кодировке UTF-8
+    # Отправляем JSON-запрос через HTTP POST в кодировке UTF-8
     try:
         headers = {
             "Authorization": f"Bearer {API_KEY}",
@@ -60,11 +60,17 @@ if user_input := st.chat_input("Здорова! Че по машинам или 
         if response.status_code == 200:
             try:
                 result = response.json()
-                reply = result["choices"]["message"]["content"]
                 
-                with st.chat_message("assistant"):
-                    st.write(reply)
-                st.session_state.messages.append({"role": "assistant", "content": reply})
+                # Защита: проверяем, что пришел словарь и внутри есть список choices
+                if isinstance(result, dict) and "choices" in result and len(result["choices"]) > 0:
+                    reply = result["choices"][0]["message"]["content"] # Пофиксили индекс массива!
+                    
+                    with st.chat_message("assistant"):
+                        st.write(reply)
+                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                else:
+                    st.error(f"Шлюз вернул нетипичный ответ: {result}")
+                    
             except ValueError:
                 st.error(f"Сервер прислал не JSON текст: {response.text}")
         else:
