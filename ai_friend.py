@@ -16,9 +16,9 @@ try:
 except Exception as e:
     SYSTEM_PROMPT = "Ты просто ИИ-помощник."
 
-# 🔌 Сетевые параметры шлюза ProxyAPI (Исправленный рабочий URL)
+# 🔌 Сетевые параметры шлюза ProxyAPI (ОФИЦИАЛЬНЫЙ РАБОЧИЙ URL)
 API_KEY = "sk-RHqikjrG8RpjVO3Xo2e2d3dZFKU6se4c"
-URL = "https://proxyapi.ru"
+URL = "https://api.proxyapi.ru/openai/v1/chat/completions" # Вот сюда добавили /openai/
 MODEL_NAME = "gpt-4o-mini"
 
 # 🧠 Работа с оперативной памятью чата (чтобы бот помнил диалог)
