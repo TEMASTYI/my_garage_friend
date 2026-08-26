@@ -23,9 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install flet
 
-      - name: Build APK (Хакерский автокликер через pipe)
-        # Утилита yes автоматически ответит "y" на вопрос об установке Flutter
-        run: yes | flet build apk calc.py
+      - name: Build APK (Исправленный путь без багов)
+        # Просто вызываем build apk, робот сам найдет файл main.py
+        run: yes | flet build apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
